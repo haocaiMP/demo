@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>snow</title>
+<style>
+	body{ text-align: center;}
+	canvas{
+		background: url(https://gw.alicdn.com/tfs/TB1yn_Khm_I8KJjy0FoXXaFnVXa-700-438.jpg) 0 0 no-repeat;
+		/*background-color: #000;*/
+	}
+</style>
+</head>
+<body>
+	<canvas width="700" height="438" id="c1"></canvas>
+
+	<script>
+	function rnd(n, m){
+		return Math.floor(Math.random()*(m-n) + n);
+	};
+
+	function d2a(n){
+		return n*Math.PI/180;
+	};
+
+	//在画布中生成雪花：
+	var oC = document.getElementById("c1");
+	var gd = oC.getContext("2d");
+	var maxW = 700;
+	var maxH =438;
+	var arr = [];
+	var num = 0;
+	// var width = 20; 
+	// setInterval(()=>{
+	// 	num+=1;
+	// },5000)
+	for(var i=0; i<100; i++){
+		arr.push({
+				"left":rnd(0, 700),
+				"top":rnd(0, 438),
+				"deg":rnd(-10, 10),
+				"scale":rnd(2, 10) 
+				});
+	}
+
+	setInterval(function(){
+		num+=0.01;
+		// console.log(num)
+		gd.clearRect(0, -num, oC.width, oC.height);
+		gd.save();
+
+		for(var i=0; i<arr.length; i++){
+			var h = 0.5 * arr[i].scale;
+			arr[i].left = arr[i].left + Math.tan(d2a(arr[i].deg))*h;
+			arr[i].top = arr[i].top + h;
+
+			//若已在画面外则删除
+			if(arr[i].left < 0 || arr[i].left > maxW || arr[i].top > maxH){
+				arr.splice(i--, 1);
+				// arr[i].top = 438;
+				continue;
+			}
+			// if (arr[i].top > maxH) {
+			// 	arr[i].top = 438;
+			// }
+			var width_i = arr[i].scale;
+			var ra = gd.createRadialGradient(arr[i].left, arr[i].top, width_i/4, arr[i].left, arr[i].top, width_i);
+			ra.addColorStop(0, "rgba(255,255,255,1)");
+			ra.addColorStop(1, "rgba(255,255,255,0.1)");
+			gd.fillStyle = ra;
+
+			gd.beginPath();
+			gd.arc(arr[i].left, arr[i].top, width_i, 0, 2*Math.PI);
+			gd.fill();
+		}
+
+		gd.restore();
+	}, 26);
+
+	//不断增加新的雪花
+	function next(){
+		setTimeout(function(){
+			if(arr.length < 200){
+				for(var i=0; i<20; i++){
+					arr.push({
+							"left":rnd(0, 700),
+							"top":0,
+							"deg":rnd(-10, 10),
+							"scale":rnd(2, 10) 
+							});
+				}
+			}
+			next();
+		}, Math.random()*200+500);
+	};
+
+	next();
+	</script>
+</body>
+</html>
